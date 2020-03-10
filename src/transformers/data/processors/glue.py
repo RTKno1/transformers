@@ -515,6 +515,57 @@ class WnliProcessor(DataProcessor):
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
 
+"""
+For step 2(a), you should create a new class named BoolqProcessor, and implement the relevant methods to read the data and create InputExamples from them.
+You should refer to the other task DataProcessors in the glue.py file as references.
+"""
+
+import json
+
+class BoolqProcessor(DataProcessor):
+    """Processor for the BoolQ data set (SUPERGLUE version)."""
+
+    def get_example_from_tensor_dict(self, tensor_dict):
+        """See base class."""
+        return InputExample(
+            tensor_dict["idx"].numpy(),
+            tensor_dict["question"].numpy().decode("utf-8"),
+            tensor_dict["passage"].numpy().decode("utf-8"),
+            str(tensor_dict["label"].numpy()),
+        )
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        json.loads(os.path.join(data_dir, "train.jsonl"))
+        return self._create_examples(self.read_json(os.path.join(data_dir, "train.jsonl")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(self.read_json(os.path.join(data_dir, "val.jsonl")), "dev_matched")
+
+    def get_labels(self):
+        """See base class."""
+        return ["True", "False"]
+    def read_json(self, data_file):
+        data = []
+        with open(data_file) as f:
+            for datum in f:
+                 data.append(json.loads(datum))
+        return data
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = "%s-%s" % (set_type, line["idx"])
+            text_a = line["question"]
+            text_b = line["passage"]
+            label = line["label"]
+            examples.append(InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
+
+
+
+
 
 glue_tasks_num_labels = {
     "cola": 2,
@@ -526,6 +577,7 @@ glue_tasks_num_labels = {
     "qnli": 2,
     "rte": 2,
     "wnli": 2,
+    "boolq": 2,
 }
 
 glue_processors = {
@@ -539,6 +591,7 @@ glue_processors = {
     "qnli": QnliProcessor,
     "rte": RteProcessor,
     "wnli": WnliProcessor,
+    "boolq": BoolqProcessor,
 }
 
 glue_output_modes = {
@@ -552,4 +605,5 @@ glue_output_modes = {
     "qnli": "classification",
     "rte": "classification",
     "wnli": "classification",
+    "boolq": "classification",
 }
