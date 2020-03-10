@@ -544,7 +544,7 @@ class BoolqProcessor(DataProcessor):
 
     def get_labels(self):
         """See base class."""
-        return ["True", "False"]
+        return [True, False]
     def read_json(self, data_file):
         data = []
         with open(data_file) as f:
